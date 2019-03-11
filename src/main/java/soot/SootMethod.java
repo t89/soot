@@ -71,6 +71,9 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 
   /** Holds the class which declares this <code>SootClass</code> method. */
   protected SootClass declaringClass;
+  
+  /** Holds the Interface which declares this <code>SootClass</code> method. */
+  protected SootClass declaringInterface;
 
   /**
    * Modifiers associated with this {@link SootMethod} (e.g. private, protected, etc.)
@@ -170,6 +173,22 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
     sig = null;
   }
 
+    /** Sets the declaring interface */
+    public synchronized void setDeclaringInterface(SootClass declInterface) {
+      // There is nothing to stop this field from being null except when it actually gets in
+      // other classes such as SootMethodRef (when it tries to resolve the method). However, if
+      // the method is not declared, it should not be trying to resolve it anyways. So I see no
+      // problem with having it able to be null.
+      if (declInterface != null) {
+        Scene.v().getMethodNumberer().add(this);
+        System.out.println("Set Declaring Interface: " + declInterface);
+      }
+      // We could call setDeclared here, however, when SootClass adds a method, it checks isDeclared
+      // and throws an exception if set. So we currently cannot call setDeclared here.
+      declaringInterface = declInterface;
+      sig = null;
+    }
+
   /** Returns the class which declares the current {@link SootMethod}. */
   @Override
   public SootClass getDeclaringClass() {
@@ -179,6 +198,15 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
 
     return declaringClass;
   }
+
+    /** Returns the interface which declares the current {@link SootMethod}. */
+    public SootClass getDeclaringInterface() {
+      if (declaringInterface == null) {
+        throw new RuntimeException("not declared: " + getName());
+      }
+  
+      return declaringInterface;
+    }
 
   public void setDeclared(boolean isDeclared) {
     this.isDeclared = isDeclared;
@@ -196,6 +224,18 @@ public class SootMethod extends AbstractHost implements ClassMember, Numberable,
   @Override
   public boolean isPhantom() {
     return isPhantom;
+  }
+
+  /** Returns true when this {@link SootMethod} object is default. */
+  public boolean isDefault() {
+    // A method is default if 
+    // - it appears in an interface AND is
+    //   - public
+    //   - non-abstract
+    //   - non-static
+    
+
+    return (!isAbstract() && !isStatic() && isPublic());
   }
 
   /** Returns true if this method is not phantom, abstract or native, i.e. this method can have a body. */

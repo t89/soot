@@ -711,6 +711,7 @@ public class SootClass extends AbstractHost implements Numberable {
     methodList.add(m);
     m.setDeclared(true);
     m.setDeclaringClass(this);
+    m.setDeclaringInterface(this.declaringInterfaceForMethod(m));
   }
 
   public synchronized SootMethod getOrAddMethod(SootMethod m) {
@@ -732,7 +733,31 @@ public class SootClass extends AbstractHost implements Numberable {
     methodList.add(m);
     m.setDeclared(true);
     m.setDeclaringClass(this);
+    m.setDeclaringInterface(this.declaringInterfaceForMethod(m));
     return m;
+  }
+
+  /**
+   * Returns a reference to the declaring interface. Returns nil if no
+   * interface is found
+   */
+  private SootClass declaringInterfaceForMethod(SootMethod m) {
+    if (interfaces == null) {
+      return null;
+    }
+
+
+
+    for (SootClass sc : interfaces) {
+      System.out.println("Interface Class Methods:" + sc.getMethods());
+      if (sc.getMethods().contains(m)) {
+        System.out.println("Interfaces" + interfaces);
+        System.out.println("Method" + m);
+        return sc;
+      }
+    }
+
+    return null;
   }
 
   public synchronized SootField getOrAddField(SootField f) {
